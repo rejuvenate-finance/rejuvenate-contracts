@@ -1,10 +1,10 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
   const Registry = await ethers.getContractFactory("AddressRegistry");
-  const reg = await upgrades.deployProxy(Registry, []);
+  const reg = await Registry.deploy();
   await reg.deployed();
-  console.log("reg deployed to:", reg.address);
+  console.log("registry deployed to:", reg.address);
 }
 
 main().catch((error) => {
