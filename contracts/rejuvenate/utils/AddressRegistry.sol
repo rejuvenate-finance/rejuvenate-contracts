@@ -7,10 +7,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @dev Interface to interact with contract below
 interface IAddressRegistry {
-  function add(address target_) external;
-
-  function remove(address target_) external;
-
   function onList(address target_) external view returns (bool);
 
   function notOnList(address target_) external view returns (bool);
