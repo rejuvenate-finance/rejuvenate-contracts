@@ -23,7 +23,11 @@ contract WLMMigration is Ownable, ReentrancyGuard {
     IRejuvenate tokenOut = IRejuvenate(output);
     require(tokenIn.balanceOf(msg.sender) > 0, "!balance");
     uint256 amount = tokenIn.balanceOf(msg.sender);
-    tokenIn.transferFrom(msg.sender, address(0), amount);
+    tokenIn.transferFrom(
+      msg.sender,
+      0x000000000000000000000000000000000000dEaD,
+      amount
+    );
     tokenOut.mint(msg.sender, amount);
     emit Migrate(msg.sender, amount);
   }
