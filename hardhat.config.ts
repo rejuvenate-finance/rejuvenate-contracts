@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  defaultNetwork: "testnet",
+  defaultNetwork: "mainnet",
   networks: {
     mainnet: {
       url: "https://bsc-dataseed.binance.org/",

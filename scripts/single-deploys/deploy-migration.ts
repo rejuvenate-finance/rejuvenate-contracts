@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 
-const wlm = "0xAE7c5644A5f7be2E57bD4095F57ecD4110465332";
-const rjv = "0xAE7c5644A5f7be2E57bD4095F57ecD4110465332";
+const wlm = "0x1Cf87CF9e01b4497674570BAA037844A3816B7A9";
+const rjv = "0xA5e1033117D08B4E3dd48aeE89412495E217C0D4";
 
 async function main() {
   const Migration = await ethers.getContractFactory("WLMMigration");
