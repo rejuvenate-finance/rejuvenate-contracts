@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @dev Interface to interact with contract below
 interface IAddressRegistry {
@@ -15,18 +14,10 @@ interface IAddressRegistry {
 /// @title
 /// @author Rejuvenate Finance
 /// @dev keeps track of addresses with a binary state
-contract AddressRegistry is Initializable, OwnableUpgradeable {
+contract AddressRegistry is Ownable {
   mapping(address => bool) public list;
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
-  /// @dev replaces constructor (proxy)
-  function initialize() public initializer {
-    __Ownable_init();
-  }
+  constructor() {}
 
   /// @dev adds address to registry
   /// @param target_ address to be added
@@ -58,7 +49,7 @@ contract AddressRegistry is Initializable, OwnableUpgradeable {
   /// @dev let's the owner remove unwanted/stuck tokens from the c
   /// @param token_ address of the token to be unstuck
   function inCaseTokensGetStuck(address token_) external onlyOwner {
-    uint256 amount = IERC20Upgradeable(token_).balanceOf(address(this));
-    IERC20Upgradeable(token_).transfer(msg.sender, amount);
+    uint256 amount = IERC20(token_).balanceOf(address(this));
+    IERC20(token_).transfer(msg.sender, amount);
   }
 }
