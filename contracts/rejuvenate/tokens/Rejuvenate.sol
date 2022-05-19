@@ -14,7 +14,7 @@ interface IRejuvenate {
 }
 
 /// @title Rejuvenate (RJV) Token
-/// @author Kevin Scheeren | Rejuvenate Finance
+/// @author Rejuvenate Finance
 /// @dev Base Token for the Rejuvenate Finance Protocol
 contract Rejuvenate is
   Initializable,
@@ -30,6 +30,7 @@ contract Rejuvenate is
     _disableInitializers();
   }
 
+  /// @dev replaces constructor (proxy)
   function initialize(address whitelist_, address blacklist_)
     public
     initializer
@@ -44,6 +45,7 @@ contract Rejuvenate is
     blacklist = blacklist_;
   }
 
+  /// @dev override to check if one of the addresses is blacklisted
   function _beforeTokenTransfer(
     address from_,
     address to_,
@@ -54,11 +56,18 @@ contract Rejuvenate is
     require(bl.notOnList(from_) && bl.notOnList(to_), "!blacklist");
   }
 
+  /// @notice mints new tokens
+  /// @dev requires the caller address to be whitelisted
+  /// @param to_ address minted tokens get sent to
+  /// @param amount_ amount of tokens to be minted
   function mint(address to_, uint256 amount_) external nonReentrant {
     require(IAddressRegistry(whitelist).onList(msg.sender), "!whitelist");
     _mint(to_, amount_);
   }
 
+  /// @notice release stuck tokens from the contract
+  /// @dev let's the owner remove unwanted/stuck tokens from the c
+  /// @param token_ address of the token to be unstuck
   function inCaseTokensGetStuck(address token_) external onlyOwner {
     require(token_ != address(this), "!token");
     uint256 amount = IERC20Upgradeable(token_).balanceOf(address(this));
