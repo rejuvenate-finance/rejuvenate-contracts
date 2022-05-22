@@ -18,77 +18,73 @@ contract Presale is Ownable, ReentrancyGuard {
   using SafeMath for uint256;
 
   // presale parameters
-  address public paymentCurrency;
-  address public forSaleCurrency;
-  uint256 public pricePerToken;
+  address public constant paymentCurrency =
+    0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+  address public constant forSaleCurrency =
+    0x2B60Bd0D80495DD27CE3F8610B4980E94056b30c;
 
   // wallets
-  address internal _dev;
-  address internal _treasury;
+  address internal constant _dev = 0xa9ae2738A7915B3512aACcD5Ff9e6CA5d09a1bfF;
+  address internal constant _teamFirst =
+    0x495eA0834daBC7B20045804690d46960DC0bD83c;
+  address internal constant _teamSecond =
+    0x4775357848EBbf4a1395A6684D45D0f206Aa4F2F;
+  address internal constant _treasury =
+    0xFb08de74D3DC381d2130e8885BdaD4e558b24145;
 
   // token iformation
   uint256 public tokenCap;
-  uint256 public tokenSold;
+  uint256 public tokensSold;
 
   /// @dev gets emitted when someone bought from presale
   event Buy(address sender_, uint256 paid_, uint256 received_);
 
-  constructor(
-    address forSaleCurrency_,
-    address paymentCurrency_,
-    uint256 pricePreToken_,
-    address treasury_,
-    address dev_,
-    uint256 tokenCap_
-  ) {
-    _treasury = treasury_;
-    _dev = dev_;
-
-    pricePerToken = pricePreToken_;
-    forSaleCurrency = forSaleCurrency_;
-    paymentCurrency = paymentCurrency_;
-
+  constructor(uint256 tokensSold_, uint256 tokenCap_) {
     tokenCap = tokenCap_;
-    tokenSold = 0;
+    tokensSold = tokensSold_;
   }
 
   /// @notice Allows people to buy @param amount_ of paymentCurrency worth of forSaleCurrency
   /// @dev Transfering paymentTokens form user to contract and minting the correct amount of forSaleTokens back
   /// @param amount_ amount of paymentCurrency to use
   function buy(uint256 amount_) external nonReentrant {
-    require(tokenSold < tokenCap, "!empty");
-    tokenSold = tokenSold.add(amount_);
+    require(tokensSold < tokenCap, "!empty");
     //! require 18 decimals
-    uint256 buyAmount = amount_.mul(1e18).div(pricePerToken);
+    uint256 buyAmount = amount_.div(4).mul(5); // 80% -> 0.8$
+    tokensSold.add(buyAmount);
+    // fixed rate of 4% goes to other teammember
     IERC20(paymentCurrency).safeTransferFrom(
       msg.sender,
-      address(this),
-      amount_
+      _teamFirst,
+      amount_.div(25)
     );
-    _distributePayment();
+    // fixed rate of 4% goes to other teammember
+    IERC20(paymentCurrency).safeTransferFrom(
+      msg.sender,
+      _teamSecond,
+      amount_.div(25)
+    );
+    // fixed rate of 12% goes to dev
+    IERC20(paymentCurrency).safeTransferFrom(
+      msg.sender,
+      _dev,
+      amount_.div(25).mul(3)
+    );
+    // treasury
+    IERC20(paymentCurrency).safeTransferFrom(
+      msg.sender,
+      _treasury,
+      amount_.div(5).mul(4)
+    );
     IRejuvenate(forSaleCurrency).mint(msg.sender, buyAmount);
     emit Buy(msg.sender, amount_, buyAmount);
-  }
-
-  /// @dev helper function to distribute the payment to dev and treasury
-  function _distributePayment() private nonReentrant {
-    // fixed rate of 10% goes to dev
-    IERC20(paymentCurrency).safeTransfer(
-      _dev,
-      IERC20(paymentCurrency).balanceOf(address(this)).div(10)
-    );
-    // send rest to treasury
-    IERC20(paymentCurrency).safeTransfer(
-      _treasury,
-      IERC20(paymentCurrency).balanceOf(address(this))
-    );
   }
 
   /// @notice Gives the remaning amount of tokens up for presale
   /// @dev Subsctract sold tokens from available tokensß
   /// @return uint256 amount of token in WEI
   function remaining() external view returns (uint256) {
-    return tokenCap.sub(tokenSold);
+    return tokenCap.sub(tokensSold);
   }
 
   /// @notice Allows the owmer to withdraw stuck tokens
